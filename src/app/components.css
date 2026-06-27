@@ -1,0 +1,929 @@
+/* ============================================================
+   CIA Luxury Fleets — gear layout system.
+   Each gear owns a distinct shape (see LAYOUT-SHAPES-REPORT.md).
+   ============================================================ */
+
+/* ---- Shared section headline ---- */
+.section-h2 {
+  font-weight: 300;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 14px 0 0;
+  max-width: 16ch;
+}
+
+.gear {
+  padding-block: clamp(84px, 12vw, 168px);
+}
+
+/* ============================================================
+   TOP NAV
+   ============================================================ */
+.top-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px clamp(20px, 5vw, 56px);
+  transition:
+    background 0.4s ease,
+    backdrop-filter 0.4s ease,
+    border-color 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+.top-nav.is-scrolled {
+  background: oklch(0.1 0.008 65 / 0.72);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--border);
+}
+.nav-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  text-decoration: none;
+}
+.nav-brand-mark {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.nav-brand-sub {
+  font-size: 9px;
+  margin-top: 3px;
+  color: var(--accent);
+}
+.nav-links {
+  display: flex;
+  gap: 30px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.nav-link {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  transition: color 0.25s ease;
+}
+.nav-link:hover {
+  color: var(--accent);
+}
+.nav-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.nav-gear {
+  color: var(--ink-3);
+}
+.nav-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--ink);
+}
+.nav-star {
+  color: var(--accent);
+  fill: var(--accent);
+}
+.nav-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+.nav-phone:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ============================================================
+   GEAR PROGRESS (left edge)
+   ============================================================ */
+.gear-progress {
+  position: fixed;
+  left: clamp(14px, 2.4vw, 30px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.gear-progress-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+  font-size: 10px;
+}
+.gear-progress-name {
+  color: var(--ink-3);
+}
+.gear-dots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.gear-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    transform 0.4s ease;
+}
+.gear-dot.is-passed {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+}
+.gear-dot.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.4);
+}
+
+/* ============================================================
+   GEAR 01 — HERO
+   ============================================================ */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  will-change: transform;
+}
+/* Horizontal scrim to guarantee text contrast over the text column (AA). */
+.hero-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    oklch(0.1 0.008 65 / 0.88) 0%,
+    oklch(0.1 0.008 65 / 0.45) 36%,
+    oklch(0.1 0.008 65 / 0) 68%
+  );
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+.hero-gear-label {
+  display: block;
+  margin-bottom: 26px;
+}
+.hero-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--font-mono), monospace;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.stat-currency {
+  font-size: 26px;
+  font-weight: 400;
+}
+.stat-number {
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.stat-unit {
+  font-size: 16px;
+  color: var(--ink-2);
+  margin-left: 4px;
+}
+.hero-h1 {
+  font-weight: 300;
+  font-size: clamp(44px, 8.5vw, 92px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 22px;
+}
+.hero-line {
+  display: block;
+  overflow: hidden;
+}
+.hero-cycling {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 38px;
+}
+.hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+.hero-scroll-cue {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-3);
+}
+.hero-scroll-rule {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--ink-3);
+  animation: scrollpulse 2.4s ease-in-out infinite;
+  transform-origin: left center;
+}
+@keyframes scrollpulse {
+  0%,
+  100% {
+    transform: scaleX(0.4);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   GEAR 02 — TRUST STRIP
+   ============================================================ */
+.trust-strip {
+  background: var(--surface-1);
+  border-block: 1px solid var(--border);
+}
+.trust-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  min-height: 56px;
+  padding: 14px clamp(16px, 4vw, 40px);
+}
+.trust-item {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 6px clamp(16px, 3vw, 34px);
+}
+.trust-figure {
+  font-size: 16px;
+  color: var(--accent);
+}
+.trust-label {
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+.trust-rule {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 22px;
+  background: var(--border-strong);
+}
+
+/* ============================================================
+   GEAR 03 — FLEET
+   ============================================================ */
+.fleet-head {
+  margin-bottom: 44px;
+}
+.fleet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  margin-top: 34px;
+}
+.fleet-tab {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--ink-3);
+  font-size: 11px;
+  padding: 0 0 10px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.fleet-tab.is-active {
+  color: var(--ink);
+}
+.fleet-tab:hover {
+  color: var(--ink-2);
+}
+.fleet-tab-indicator {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--accent);
+}
+
+.fleet-carousel {
+  position: relative;
+}
+.fleet-viewport {
+  overflow: hidden;
+}
+.fleet-track {
+  display: flex;
+  align-items: center;
+}
+.fleet-slide {
+  position: relative;
+  flex: 0 0 78%;
+  min-width: 0;
+  padding: 0 12px;
+  transform: scale(0.86);
+  opacity: 0.35;
+  transition:
+    transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.fleet-slide.is-active {
+  transform: scale(1);
+  opacity: 1;
+}
+.fleet-frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.fleet-overlay {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: clamp(20px, 3.4vw, 44px);
+}
+.fleet-name {
+  font-weight: 400;
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1;
+  color: var(--ink);
+  margin: 8px 0 6px;
+}
+.fleet-tagline {
+  font-size: 14px;
+  color: var(--ink-2);
+  max-width: 28ch;
+  margin: 0 0 12px;
+}
+.fleet-price {
+  font-size: clamp(20px, 2.4vw, 28px);
+  color: var(--accent);
+}
+.fleet-price-unit {
+  font-size: 0.55em;
+  color: var(--ink-2);
+  margin-left: 3px;
+}
+
+.fleet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 26px;
+}
+.fleet-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.fleet-arrow:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.fleet-count {
+  font-size: 13px;
+  color: var(--ink-3);
+  min-width: 84px;
+  text-align: center;
+}
+
+.specs-drawer {
+  margin: 40px auto 0;
+  max-width: 540px;
+  border-top: 1px solid var(--border-strong);
+}
+.specs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.specs-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-3);
+}
+.specs-label svg {
+  color: var(--accent);
+}
+.specs-value {
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.accent-value {
+  color: var(--accent);
+}
+.specs-cta {
+  margin-top: 22px;
+  width: 100%;
+  justify-content: center;
+}
+
+.fleet-marquee {
+  margin-top: clamp(60px, 9vw, 120px);
+  padding-block: 22px;
+  border-block: 1px solid var(--border);
+}
+
+/* ============================================================
+   GEAR 04 — SERVICES
+   ============================================================ */
+.services-featured {
+  display: grid;
+  grid-template-columns: 58% 42%;
+  align-items: stretch;
+  min-height: clamp(360px, 46vw, 540px);
+  border-block: 1px solid var(--border);
+}
+.services-featured-media {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+.services-featured-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: clamp(28px, 5vw, 72px);
+  background: var(--surface-1);
+}
+.services-featured-title {
+  font-weight: 400;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+  color: var(--ink);
+  margin: 6px 0;
+}
+.services-featured-note {
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.services-featured-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  width: fit-content;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+.services-featured-cta:hover {
+  border-bottom-color: var(--accent);
+}
+
+.services-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: clamp(40px, 6vw, 72px);
+}
+.services-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px clamp(14px, 2vw, 28px);
+  text-decoration: none;
+  border-left: 1px solid var(--border);
+}
+.services-item:first-child {
+  border-left: none;
+}
+.services-item-icon {
+  color: var(--accent);
+}
+.services-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.services-item-note {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* ============================================================
+   GEAR 05 — WHY CIA
+   ============================================================ */
+.why-grid {
+  list-style: none;
+  margin: clamp(36px, 5vw, 60px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--border);
+}
+.why-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: clamp(22px, 3vw, 36px) clamp(14px, 2.4vw, 32px);
+  border-bottom: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+.why-item:nth-child(3n + 1) {
+  border-left: none;
+}
+.why-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.why-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ============================================================
+   GEAR 06 — HOW IT WORKS + TESTIMONIAL
+   ============================================================ */
+.how-block {
+  margin-bottom: 120px;
+}
+.how-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: clamp(40px, 6vw, 72px);
+}
+.how-rule {
+  position: absolute;
+  top: 50%;
+  left: 4%;
+  right: 4%;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+.how-step {
+  position: relative;
+  z-index: 1;
+  padding: 12px 0;
+}
+.how-numeral {
+  position: absolute;
+  top: -38px;
+  left: -6px;
+  font-size: clamp(56px, 8vw, 80px);
+  font-weight: 300;
+  color: var(--accent);
+  opacity: 0.2;
+  z-index: 0;
+  line-height: 1;
+}
+.how-step-body {
+  position: relative;
+  z-index: 1;
+}
+.how-step-title {
+  font-weight: 400;
+  font-size: clamp(18px, 2.4vw, 22px);
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.how-step-note {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+.testimonial-block {
+  position: relative;
+  text-align: center;
+  padding-block: clamp(40px, 6vw, 72px);
+}
+.testimonial-mark {
+  position: absolute;
+  top: -20px;
+  left: clamp(20px, 8vw, 120px);
+  font-size: 120px;
+  font-weight: 300;
+  color: var(--accent);
+  opacity: 0.12;
+  line-height: 1;
+}
+.testimonial-quote {
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.4;
+  color: var(--ink);
+  max-width: 22ch;
+  margin: 0 auto 22px;
+}
+.testimonial-word {
+  display: inline;
+}
+.testimonial-attr {
+  color: var(--ink-3);
+}
+
+/* ============================================================
+   GEAR 07 — BOOKING + CONTACT
+   ============================================================ */
+.booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.booking-title {
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(36px, 5vw, 56px);
+  color: var(--ink);
+  margin: 14px 0 18px;
+}
+.booking-lead {
+  font-size: 15px;
+  color: var(--ink-2);
+  max-width: 34ch;
+  margin: 0 0 32px;
+}
+.booking-contact {
+  list-style: none;
+  margin: 0 0 30px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.booking-contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.booking-contact svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.booking-contact a {
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+.booking-contact a:hover {
+  color: var(--accent);
+}
+.booking-wa {
+  margin-bottom: 22px;
+}
+.booking-fine {
+  color: var(--ink-3);
+  font-size: 10px;
+}
+
+.booking-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 40px);
+}
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  transition: border-color 0.25s ease;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.field textarea {
+  resize: vertical;
+}
+.field-error {
+  font-size: 12px;
+  color: oklch(0.7 0.16 35);
+}
+.booking-server-error {
+  line-height: 1.6;
+}
+.booking-server-error a {
+  color: var(--accent);
+}
+
+.booking-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+}
+.booking-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+}
+.booking-success-title {
+  font-weight: 400;
+  font-size: 28px;
+  color: var(--ink);
+  margin: 0;
+}
+.booking-success-note {
+  font-size: 14px;
+  color: var(--ink-2);
+  max-width: 34ch;
+  margin: 0;
+}
+
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: clamp(60px, 9vw, 120px);
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .nav-links {
+    display: none;
+  }
+  .services-featured {
+    grid-template-columns: 1fr;
+  }
+  .services-featured-media {
+    min-height: 300px;
+  }
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .why-item:nth-child(3n + 1) {
+    border-left: 1px solid var(--border);
+  }
+  .why-item:nth-child(2n + 1) {
+    border-left: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .nav-phone-text {
+    display: none;
+  }
+  .gear-progress {
+    display: none;
+  }
+  .fleet-slide {
+    flex: 0 0 90%;
+  }
+  .services-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .services-item:nth-child(odd) {
+    border-left: none;
+  }
+  .how-steps {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .how-rule {
+    display: none;
+  }
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .trust-item {
+    padding: 6px 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+  .why-item {
+    border-left: none !important;
+  }
+  .nav-rating {
+    display: none;
+  }
+}
