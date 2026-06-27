@@ -185,6 +185,13 @@
   z-index: 0;
   will-change: transform;
 }
+.hero-photo-inner {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.08);
+  transform-origin: center;
+  will-change: transform;
+}
 /* Horizontal scrim to guarantee text contrast over the text column (AA). */
 .hero-photo::after {
   content: "";

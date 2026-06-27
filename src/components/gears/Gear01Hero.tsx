@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { motion, useSpring, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { img, IMAGE_IDS } from "@/lib/images";
@@ -28,6 +29,18 @@ function splitChars(text: string, lineKey: string) {
 
 export function Gear01Hero() {
   const root = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  // Living-field parallax: the canvas drifts against the cursor (Sui principle).
+  const px = useSpring(0, { stiffness: 120, damping: 22 });
+  const py = useSpring(0, { stiffness: 120, damping: 22 });
+
+  const onPointerMove = (e: React.MouseEvent) => {
+    if (reduced) return;
+    const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+    const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+    px.set(-nx * 14);
+    py.set(-ny * 14);
+  };
 
   useEffect(() => {
     const prefersReduced = window.matchMedia(
@@ -75,18 +88,26 @@ export function Gear01Hero() {
   }, []);
 
   return (
-    <section id="gear-01" ref={root} className="hero" aria-label="Hero">
+    <section
+      id="gear-01"
+      ref={root}
+      className="hero"
+      aria-label="Hero"
+      onMouseMove={onPointerMove}
+    >
       <div id="hero-photo" className="hero-photo">
-        <Image
-          src={img(IMAGE_IDS.hero, 1920, 72)}
-          alt="A black luxury SUV under dramatic low-key light in a dark garage at blue hour"
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          quality={72}
-          style={{ objectFit: "cover", objectPosition: "center 60%" }}
-        />
+        <motion.div className="hero-photo-inner" style={{ x: px, y: py }}>
+          <Image
+            src={img(IMAGE_IDS.hero, 1920, 72)}
+            alt="A black luxury SUV under dramatic low-key light in a dark garage at blue hour"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={72}
+            style={{ objectFit: "cover", objectPosition: "center 60%" }}
+          />
+        </motion.div>
         <div className="scrim" />
       </div>
 

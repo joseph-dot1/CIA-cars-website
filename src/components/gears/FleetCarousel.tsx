@@ -3,13 +3,64 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 import { ChevronLeft, ChevronRight, Users, Cog, Banknote } from "lucide-react";
 import type { Car } from "@/lib/fleet";
 import { formatNaira } from "@/lib/fleet";
 import { img } from "@/lib/images";
 import { springs } from "@/lib/motion";
 import { whatsappLink } from "@/lib/site";
+
+// One slide. Its own component so the tilt hooks get their own scope
+// (avoids hooks-in-loop / hooks-in-helper). Active frame tilts toward the cursor.
+function FleetSlide({ car, isActive }: { car: Car; isActive: boolean }) {
+  const reduced = useReducedMotion();
+  const rotateX = useSpring(0, { stiffness: 250, damping: 22 });
+  const rotateY = useSpring(0, { stiffness: 250, damping: 22 });
+
+  const onMove = (e: React.MouseEvent) => {
+    if (reduced || !isActive) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5;
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    rotateY.set(nx * 6);
+    rotateX.set(-ny * 6);
+  };
+  const onLeave = () => {
+    rotateX.set(0);
+    rotateY.set(0);
+  };
+
+  return (
+    <div className={`fleet-slide ${isActive ? "is-active" : ""}`} aria-hidden={!isActive}>
+      <motion.div
+        className="fleet-frame"
+        style={{ rotateX, rotateY, transformPerspective: 1100 }}
+        onMouseMove={onMove}
+        onMouseLeave={onLeave}
+      >
+        <Image
+          src={img(car.imageId, 1400, 78)}
+          alt={car.alt}
+          fill
+          sizes="(max-width: 768px) 92vw, 70vw"
+          quality={78}
+          style={{ objectFit: "cover" }}
+        />
+        <div className="scrim" />
+        <div className="fleet-overlay">
+          <span className="mono-label">{car.name.split(" ")[0]}</span>
+          <h3 className="fleet-name font-display">{car.name}</h3>
+          <p className="fleet-tagline">{car.tagline}</p>
+          <p className="fleet-price font-mono">
+            from {formatNaira(car.priceFrom)}
+            <span className="fleet-price-unit">/day</span>
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 export function FleetCarousel({ cars }: { cars: Car[] }) {
   const reduced = useReducedMotion();
@@ -42,37 +93,9 @@ export function FleetCarousel({ cars }: { cars: Car[] }) {
     <div className="fleet-carousel">
       <div className="fleet-viewport" ref={emblaRef}>
         <div className="fleet-track">
-          {cars.map((car, i) => {
-            const isActive = i === selected;
-            return (
-              <div
-                className={`fleet-slide ${isActive ? "is-active" : ""}`}
-                key={car.id}
-                aria-hidden={!isActive}
-              >
-                <div className="fleet-frame">
-                  <Image
-                    src={img(car.imageId, 1400, 78)}
-                    alt={car.alt}
-                    fill
-                    sizes="(max-width: 768px) 92vw, 70vw"
-                    quality={78}
-                    style={{ objectFit: "cover" }}
-                  />
-                  <div className="scrim" />
-                  <div className="fleet-overlay">
-                    <span className="mono-label">{car.name.split(" ")[0]}</span>
-                    <h3 className="fleet-name font-display">{car.name}</h3>
-                    <p className="fleet-tagline">{car.tagline}</p>
-                    <p className="fleet-price font-mono">
-                      from {formatNaira(car.priceFrom)}
-                      <span className="fleet-price-unit">/day</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {cars.map((car, i) => (
+            <FleetSlide key={car.id} car={car} isActive={i === selected} />
+          ))}
         </div>
       </div>
 

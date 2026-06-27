@@ -89,6 +89,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <div className="ambient-glow" aria-hidden="true" />
         <GrainFilter />
         {children}
       </body>

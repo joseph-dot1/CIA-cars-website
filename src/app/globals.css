@@ -91,6 +91,36 @@ html.lenis body {
   text-transform: uppercase;
 }
 
+/* ---- Ambient glow — the dark field that breathes (Sui living canvas) ---- */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      40rem 40rem at 82% 12%,
+      var(--accent-glow) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      36rem 36rem at 8% 88%,
+      oklch(0.6 0.1 72 / 0.08) 0%,
+      transparent 62%
+    );
+  animation: ambient-drift 24s ease-in-out infinite alternate;
+}
+@keyframes ambient-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(-2.5%, 2%, 0) scale(1.08);
+    opacity: 1;
+  }
+}
+
 /* ---- Grain overlay (always on, §3) ---- */
 .grain {
   position: fixed;
